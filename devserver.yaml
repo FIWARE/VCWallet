@@ -1,0 +1,61 @@
+# The directory with the source files for the PWA, relative to current directory
+sourcedir: front/src
+
+# The distribution files after building the app, relative to current directory
+targetdir: docs
+
+# If cleantarget is true, erase the 'targetdir' before building
+cleantarget: true
+
+# The individual HTML files composing the application
+# Name is relative to the 'sourcedir'
+htmlfiles:
+  - index.html
+
+# The JavaScript files which are the entrypoints (normally included in the HTML files)
+# Name is relative to the 'sourcedir'
+entryPoints:
+  - app.js
+
+# The directory whith the source javascipt for the app pages
+# Name relative to 'sourcedir'
+pagedir: /pages
+
+# Directory with files that will be copied to target without any processing
+# ATTENTION: name is relative to the root of the project, not to 'sourcedir'
+# This means that static assets can be located anywhere in the project directory
+staticAssets:
+  source: front/src/public
+  target: docs
+
+# Set to true if you want entrypoint names to include a hash
+# This includes the pages names
+hashEntrypointNames: true
+
+subdomainprefix: /faster
+
+# Configuration specific to the development server process
+# In addition to serving local content, the server can forward some requests from the frontend to other
+# servers, helping development in complex projects
+devserver:
+  listenAddress: ":3500"
+  autobuild: true
+  # Information to proxy some requests to other server
+  # proxy:
+  #   - route: /webauthn/*
+  #     target: http://localhost:3000
+
+# The server can also use server-generated content using Go templates, to complement the PWA in some cases
+templates:
+  # Directory with the templates (can have subdirectories)
+  dir: templates
+  # This is an array of named templates with the data structure required by them
+  elems:
+    - name: index
+      data:
+        Homepage: InitPage
+        MenuItems:
+          - { page: "IntroPage", text: "Home", params: "" }
+          - { page: "ScanQrPage", text: "Scan QR", params: "" }
+          - { page: "SelectLanguage", text: "Language", params: "" }
+          - { page: "SelectCamera", text: "Camera", params: "" }
