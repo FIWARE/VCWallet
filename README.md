@@ -35,4 +35,58 @@ The development server will automatically build the wallet every time that the b
 
 ## Deployment to production
 
-To deploy the wallet to production, you juat need a static file server or CDN (like Netlify). Just deploy the files inside the `docs` directory.
+To deploy the wallet to production, you just need a static file server or CDN (like Netlify). Just deploy the files inside the `docs` directory.
+
+## Configuration of the build and bundling process
+
+The build process can be configured with the `devserver.yaml` configuration file in the root of the repository. An example configuration file is the following:
+
+```yaml
+# The directory with the source files for the PWA, relative to current directory
+sourcedir: front/src
+
+# The distribution files after building the app, relative to current directory
+targetdir: docs
+
+# If cleantarget is true, erase the 'targetdir' before building
+cleantarget: true
+
+# The individual HTML files composing the application
+# Name is relative to the 'sourcedir'
+htmlfiles:
+  - index.html
+
+# The JavaScript files which are the entrypoints (normally included in the HTML files)
+# Name is relative to the 'sourcedir'
+entryPoints:
+  - app.js
+
+# The directory whith the source javascipt for the app pages
+# Name relative to 'sourcedir'
+pagedir: /pages
+
+# Directory with files that will be copied to target without any processing
+# ATTENTION: name is relative to the root of the project, not to 'sourcedir'
+# This means that static assets can be located anywhere in the project directory
+staticAssets:
+  source: front/src/public
+  target: docs
+
+# Set to true if you want entrypoint names to include a hash
+# This includes the pages names
+hashEntrypointNames: true
+
+subdomainprefix: /faster
+
+# Configuration specific to the development server process
+# In addition to serving local content, the server can forward some requests from the frontend to other
+# servers, helping development in complex projects
+devserver:
+  listenAddress: ":3500"
+  autobuild: true
+  # Information to proxy some requests to other server
+  # proxy:
+  #   - route: /webauthn/*
+  #     target: http://localhost:3000
+```
+
