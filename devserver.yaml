@@ -44,18 +44,3 @@ devserver:
   # proxy:
   #   - route: /webauthn/*
   #     target: http://localhost:3000
-
-# The server can also use server-generated content using Go templates, to complement the PWA in some cases
-templates:
-  # Directory with the templates (can have subdirectories)
-  dir: templates
-  # This is an array of named templates with the data structure required by them
-  elems:
-    - name: index
-      data:
-        Homepage: InitPage
-        MenuItems:
-          - { page: "IntroPage", text: "Home", params: "" }
-          - { page: "ScanQrPage", text: "Scan QR", params: "" }
-          - { page: "SelectLanguage", text: "Language", params: "" }
-          - { page: "SelectCamera", text: "Camera", params: "" }
