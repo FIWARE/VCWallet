@@ -37,6 +37,10 @@ The development server will automatically build the wallet every time that the b
 
 To deploy the wallet to production, you just need a static file server or CDN (like Netlify). Just deploy the files inside the `docs` directory.
 
+For example, this repository is using Github Pages to serve the wallet. You can use the scanner of your mobile to scan the QR code below which points to the Pages url:
+
+![](qrcode.png)
+
 ## Configuration of the build and bundling process
 
 The build process can be configured with the `devserver.yaml` configuration file in the root of the repository. An example configuration file is the following:
