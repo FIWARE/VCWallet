@@ -65,7 +65,8 @@ window.MHR.register("SIOPSelectCredential", class SIOPSelectCredential extends w
 });
 async function sendCredential(backEndpoint, credential, state) {
   console.log("sending POST to:", backEndpoint + "?state=" + state);
-  let body = { "credential": credential };
+  var jsonCred = JSON.parse(credential)
+  let body = { "credential": jsonCred };
   try {
     let response = await fetch(backEndpoint + "?state=" + state, {
       method: "POST",
