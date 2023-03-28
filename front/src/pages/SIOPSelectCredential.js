@@ -1,4 +1,6 @@
 import { log } from '../log'
+import { Base64 } from 'js-base64';
+
 // import * as db from "../components/db"
 // import * as jwt from "../components/jwt"
 
@@ -74,19 +76,45 @@ window.MHR.register("SIOPSelectCredential", class SIOPSelectCredential extends w
 
 })
 
-
 async function sendCredential(backEndpoint, credential, state) {
 
     console.log("sending POST to:", backEndpoint + "?state=" + state)
-    let body = {"credential":credential}
+    var ps = {
+        id: "Placeholder - not yet evaluated.",
+        definition_id: "Example definition." 
+    }
+    var vpToken = {
+        context: ["https://www.w3.org/2018/credentials/v1"],
+        type: ["VerifiablePresentation"],
+        verifiableCredential: [
+            JSON.parse(credential)
+        ],
+        // currently unverified
+        holder: "did:my:wallet"
+    }
+    console.log("The encoded credential " +Base64.encodeURI(JSON.stringify(vpToken)))
+
+    var formAttributes = {
+        'vp_token': Base64.encodeURI(JSON.stringify(vpToken)),
+        'presentation_submission': Base64.encodeURI(JSON.stringify(ps))
+    }
+    var formBody = [];
+    for (var property in formAttributes) {
+    var encodedKey = encodeURIComponent(property);
+    var encodedValue = encodeURIComponent(formAttributes[property]);
+    formBody.push(encodedKey + "=" + encodedValue);
+    }
+    formBody = formBody.join("&");
+    console.log("The body: " + formBody)
     try {
         let response = await fetch(backEndpoint + "?state=" + state, {
             method: "POST",
             mode: "cors",
+            cache: "no-cache",
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: JSON.stringify(body),
+            body: formBody,
         })
         if (response.ok) {
             var result = await response.text()

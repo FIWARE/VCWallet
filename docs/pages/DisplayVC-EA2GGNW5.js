@@ -12,7 +12,8 @@ window.MHR.register("DisplayVC", class DisplayVC extends window.MHR.AbstractPage
   }
   async enter(qrData) {
     let html = this.html;
-    if (qrData == null || !qrData.startsWith) {
+    console.log("The data " + JSON.stringify(qrData));
+    if (qrData == null) {
       log.error("The scanned QR does not contain a valid URL");
       gotoPage("ErrorPage", { "title": "No data received", "msg": "The scanned QR does not contain a valid URL" });
       return;

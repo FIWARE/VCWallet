@@ -11,10 +11,10 @@ window.MHR.register("DisplayVC", class DisplayVC extends window.MHR.AbstractPage
 
     async enter(qrData) {
         let html = this.html
-
+        console.log("The data " + JSON.stringify(qrData))    
         // We should have received a URL that was scanned as a QR code.
         // Perform some sanity checks on the parameter
-        if (qrData == null || !qrData.startsWith) {
+        if (qrData == null) {
             log.error("The scanned QR does not contain a valid URL")
             gotoPage("ErrorPage", {"title": "No data received", "msg": "The scanned QR does not contain a valid URL"})
             return

@@ -19,6 +19,7 @@ const QR_MULTI = 2
 const QR_HC1 = 3
 const QR_SIOP_URL = 4
 const QR_W3C_VC = 5
+const QR_OIDC4VCI = 6
 
 
 window.MHR.register("ScanQrPage", class ScanQrPage extends window.MHR.AbstractPage {
@@ -270,6 +271,14 @@ window.MHR.register("ScanQrPage", class ScanQrPage extends window.MHR.AbstractPa
             return true;
         }
 
+        // Handle a normal QR code with a OIDC4VCI connection string
+        if (qrType === QR_OIDC4VCI) {
+            console.log("Going to ", "LoadAndSaveQRVC")
+            window.MHR.gotoPage("LoadAndSaveQRVC", qrData)
+            return true;
+        }
+
+
     }
 
     async exit() {
@@ -313,7 +322,10 @@ window.MHR.register("ScanQrPage", class ScanQrPage extends window.MHR.AbstractPa
             // Normal QR with a URL where the real data is located
             // We require secure connections with https, and do not accept http schemas
             return QR_URL;
-        } else {
+        } else if (qrData.startsWith("openid-initiate-issuance")) {
+            // Normal QR with OIDC4VCI connection string
+            return QR_OIDC4VCI;
+        }  else {
             return QR_UNKNOWN
         }
     }
