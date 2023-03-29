@@ -1,6 +1,4 @@
-import {
-  log
-} from "../chunks/chunk-FVTRWWP3.js";
+import "../chunks/chunk-FVTRWWP3.js";
 import "../chunks/chunk-KRYK5JSZ.js";
 
 // front/node_modules/js-base64/base64.mjs
@@ -250,36 +248,21 @@ async function sendCredential(backEndpoint, credential, state) {
   try {
     let response = await fetch(backEndpoint + "?state=" + state, {
       method: "POST",
-      mode: "cors",
+      mode: "no-cors",
       cache: "no-cache",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
       },
       body: formBody
     });
-    if (response.ok) {
-      var result = await response.text();
-    } else {
-      if (response.status == 403) {
-        alert.apply("error 403");
-        window.MHR.goHome();
-        return "Error 403";
-      }
-      var error = await response.text();
-      log.error(error);
-      alert(error);
-      window.MHR.goHome();
-      return null;
-    }
-  } catch (error2) {
-    log.error(error2);
-    alert(error2);
+    gotoPage("MessagePage", {
+      title: "Credential sent",
+      msg: "The credential has been sent to the Verifier"
+    });
+    return null;
+  } catch (error) {
+    console.log(error);
+    alert(error);
     return null;
   }
-  console.log(result);
-  gotoPage("MessagePage", {
-    title: "Credential sent",
-    msg: "The credential has been sent to the Verifier"
-  });
-  return;
 }
