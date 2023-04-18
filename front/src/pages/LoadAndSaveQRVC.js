@@ -99,11 +99,19 @@ window.MHR.register("LoadAndSaveQRVC", class LoadAndSaveQRVC extends window.MHR.
     saveVC() {
         console.log("Save VC " + JSON.stringify(this.VC))
         // Store it in local storage
-        log.log(this.VC)
-        window.localStorage.setItem("W3C_VC_LD", this.VC)
-
+        log.log("Store " + this.VC)
+        let total = 0;
+        if(!!window.localStorage.getItem("W3C_VC_LD_TOTAL")) {
+          total = parseInt(window.localStorage.getItem("W3C_VC_LD_TOTAL"))
+          log.log("Total " + total)
+        }
+        const id = "W3C_VC_LD_"+total
+        window.localStorage.setItem(id, this.VC)
+        total = total + 1;
+        log.log(total + " credentials in storage.")
+        window.localStorage.setItem("W3C_VC_LD_TOTAL", total)
         // Reload the application with a clean URL
-        gotoPage("DisplayVC", this.VC)
+        gotoPage("DisplayVC", id)
         return
     }
 

@@ -28,8 +28,12 @@ window.MHR.register("SIOPSelectCredential", class SIOPSelectCredential extends w
         console.log("state", state, "redirect_uri", redirect_uri)
 
         // Check if we have a certificate in local storage
-        let qrContent = window.localStorage.getItem("W3C_VC_LD")
-        if (!qrContent) {
+        let total = 0
+        if(!!window.localStorage.getItem("W3C_VC_LD_TOTAL")) {
+          total = parseInt(window.localStorage.getItem("W3C_VC_LD_TOTAL"))
+        }
+
+        if (total < 1) {
             let theHtml = html`
             <div class="w3-panel w3-margin w3-card w3-center w3-round color-error">
             <p>You do not have a Verifiable Credential.</p>
@@ -39,7 +43,13 @@ window.MHR.register("SIOPSelectCredential", class SIOPSelectCredential extends w
             this.render(theHtml)
             return             
         }
-
+        let qrContent = []
+        for (let i = 0; i < total; i++) { 
+            const currentId = "W3C_VC_LD_"+i
+            if(!!window.localStorage.getItem(currentId)) { 
+                qrContent.push(window.localStorage.getItem(currentId))
+            }
+        }
         console.log("credential", qrContent)
 
         let theHtml = html`
@@ -83,12 +93,11 @@ async function sendCredential(backEndpoint, credential, state) {
         id: "Placeholder - not yet evaluated.",
         definition_id: "Example definition." 
     }
+    log.log("The credential: " + credential)
     var vpToken = {
         context: ["https://www.w3.org/2018/credentials/v1"],
         type: ["VerifiablePresentation"],
-        verifiableCredential: [
-            JSON.parse(credential)
-        ],
+        verifiableCredential: JSON.parse("[" + credential + "]"),
         // currently unverified
         holder: "did:my:wallet"
     }
