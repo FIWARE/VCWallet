@@ -1,4 +1,6 @@
 import { log } from '../log'
+import { Base64 } from 'js-base64';
+
 // import * as db from "../components/db"
 // import * as jwt from "../components/jwt"
 
@@ -26,8 +28,12 @@ window.MHR.register("SIOPSelectCredential", class SIOPSelectCredential extends w
         console.log("state", state, "redirect_uri", redirect_uri)
 
         // Check if we have a certificate in local storage
-        let qrContent = window.localStorage.getItem("W3C_VC_LD")
-        if (!qrContent) {
+        let total = 0
+        if(!!window.localStorage.getItem("W3C_VC_LD_TOTAL")) {
+          total = parseInt(window.localStorage.getItem("W3C_VC_LD_TOTAL"))
+        }
+
+        if (total < 1) {
             let theHtml = html`
             <div class="w3-panel w3-margin w3-card w3-center w3-round color-error">
             <p>You do not have a Verifiable Credential.</p>
@@ -37,7 +43,13 @@ window.MHR.register("SIOPSelectCredential", class SIOPSelectCredential extends w
             this.render(theHtml)
             return             
         }
-
+        let qrContent = []
+        for (let i = 0; i < total; i++) { 
+            const currentId = "W3C_VC_LD_"+i
+            if(!!window.localStorage.getItem(currentId)) { 
+                qrContent.push(window.localStorage.getItem(currentId))
+            }
+        }
         console.log("credential", qrContent)
 
         let theHtml = html`
@@ -74,45 +86,54 @@ window.MHR.register("SIOPSelectCredential", class SIOPSelectCredential extends w
 
 })
 
-
 async function sendCredential(backEndpoint, credential, state) {
 
     console.log("sending POST to:", backEndpoint + "?state=" + state)
-    let body = {"credential":credential}
+    var ps = {
+        id: "Placeholder - not yet evaluated.",
+        definition_id: "Example definition." 
+    }
+    log.log("The credential: " + credential)
+    var vpToken = {
+        context: ["https://www.w3.org/2018/credentials/v1"],
+        type: ["VerifiablePresentation"],
+        verifiableCredential: JSON.parse("[" + credential + "]"),
+        // currently unverified
+        holder: "did:my:wallet"
+    }
+    console.log("The encoded credential " +Base64.encodeURI(JSON.stringify(vpToken)))
+
+    var formAttributes = {
+        'vp_token': Base64.encodeURI(JSON.stringify(vpToken)),
+        'presentation_submission': Base64.encodeURI(JSON.stringify(ps))
+    }
+    var formBody = [];
+    for (var property in formAttributes) {
+    var encodedKey = encodeURIComponent(property);
+    var encodedValue = encodeURIComponent(formAttributes[property]);
+    formBody.push(encodedKey + "=" + encodedValue);
+    }
+    formBody = formBody.join("&");
+    console.log("The body: " + formBody)
     try {
         let response = await fetch(backEndpoint + "?state=" + state, {
             method: "POST",
-            mode: "cors",
+            mode: "no-cors",
+            cache: "no-cache",
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: JSON.stringify(body),
+            body: formBody,
         })
-        if (response.ok) {
-            var result = await response.text()
-        } else {
-            if (response.status == 403) {
-                alert.apply("error 403")
-                window.MHR.goHome()
-                return "Error 403"
-            }
-            var error = await response.text()
-            log.error(error)
-            alert(error)
-            window.MHR.goHome()
-            return null
-        }
+        gotoPage("MessagePage", {
+            title: "Credential sent",
+            msg: "The credential has been sent to the Verifier"
+        });
+        return null
+
     } catch (error) {
-        log.error(error)
+        console.log(error)
         alert(error)
         return null
     }
-
-    console.log(result)
-    gotoPage("MessagePage", {
-        title: "Credential sent",
-        msg: "The credential has been sent to the Verifier"
-    })
-    return
-
 }

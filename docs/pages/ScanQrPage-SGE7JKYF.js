@@ -22,6 +22,7 @@ var QR_MULTI = 2;
 var QR_HC1 = 3;
 var QR_SIOP_URL = 4;
 var QR_W3C_VC = 5;
+var QR_OIDC4VCI = 6;
 window.MHR.register("ScanQrPage", class ScanQrPage extends window.MHR.AbstractPage {
   displayPage;
   detectionInterval = 200;
@@ -183,6 +184,11 @@ window.MHR.register("ScanQrPage", class ScanQrPage extends window.MHR.AbstractPa
       window.MHR.gotoPage("LoadAndSaveQRVC", qrData);
       return true;
     }
+    if (qrType === QR_OIDC4VCI) {
+      console.log("Going to ", "LoadAndSaveQRVC");
+      window.MHR.gotoPage("LoadAndSaveQRVC", qrData);
+      return true;
+    }
   }
   async exit() {
     if (!this.videoElement.current) {
@@ -210,6 +216,8 @@ window.MHR.register("ScanQrPage", class ScanQrPage extends window.MHR.AbstractPa
       return QR_W3C_VC;
     } else if (qrData.startsWith("https")) {
       return QR_URL;
+    } else if (qrData.startsWith("openid-initiate-issuance")) {
+      return QR_OIDC4VCI;
     } else {
       return QR_UNKNOWN;
     }
