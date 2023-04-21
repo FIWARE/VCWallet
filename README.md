@@ -1,6 +1,6 @@
 # VCWallet
 
-> :warning: This wallet is intended to be used as a minimal demo application. It does only store one credential and does not encryption or verfication of issuers or relying parties. Do NOT use this in production.
+> :warning: This wallet is intended to be used as a minimal demo application. It does no encryption or verfication of issuers or relying parties. Do NOT use this in production.
 
 A minimum wallet as a PWA for Verifiable Credentials following the DSBA Technical Convergence Discussions document. 
 
