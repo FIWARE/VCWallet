@@ -36,7 +36,14 @@ ${theData}
         </div>
         
         <div class="w3-container w3-padding-16">       
-        <btn-primary @click=${() => goHome()}>${T("Home")}</btn-primary>
+          <btn-primary @click=${() => goHome()}>${T("Home")}</btn-primary>
+          <div class="w3-dropdown-hover">
+            <btn-primary>Get Compliancy Credential</btn-primary>
+            <div class="w3-dropdown-content w3-bar-block w3-border w3-padding-small">
+              <button class="w3-bar-item w3-button" @click=${() => getCompliancyCredential(theData,"https://compliance.gaia-x.fiware.dev/api/credential-offers")}>${T("FIWARE Compliance Service")}</button>
+              <button class="w3-bar-item w3-button" @click=${() => getCompliancyCredential(theData,"https://compliance.lab.gaia-x.eu/development/api/credential-offers")}>${T("Gaia-X Lab Compliance Service")}</button>
+            </div>
+          </div> 
         </div>
         `
         
@@ -59,3 +66,60 @@ ${theData}
     }
 
 })
+
+async function getCompliancyCredential(theCredential, serviceAddress) {
+    try {
+        console.log(theCredential)
+        var credentialReq = {
+            '@context': "https://www.w3.org/2018/credentials/v1",
+            type: "VerifiablePresentation",
+            verifiableCredential: [
+              JSON.parse(theCredential)
+            ]
+        }
+        console.log("Body " + JSON.stringify(credentialReq))
+        let response = await fetch(serviceAddress, {
+          method: "POST",
+          cache: "no-cache",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(credentialReq),
+          mode: "cors"
+        });
+        if (response.ok) {
+            var credentialBody = await response.text();
+          } else {
+            if (response.status == 403) {
+              alert.apply("error 403");
+              window.MHR.goHome();
+              return "Error 403";
+            }
+            var error = await response.text();
+            log.error(error);
+            window.MHR.goHome();
+            alert(error);
+            return null;
+          }
+    } catch  (error2) {
+        log.error(error2);
+        alert(error2);
+        return null;
+        }
+    console.log(credentialBody);
+    // Store it in local storage
+    log.log("Store " + credentialBody)
+    let total = 0;
+    if(!!window.localStorage.getItem("W3C_VC_LD_TOTAL")) {
+      total = parseInt(window.localStorage.getItem("W3C_VC_LD_TOTAL"))
+      log.log("Total " + total)
+    }
+    const id = "W3C_VC_LD_"+total
+    window.localStorage.setItem(id, credentialBody)
+    total = total + 1;
+    log.log(total + " credentials in storage.")
+    window.localStorage.setItem("W3C_VC_LD_TOTAL", total)
+    // Reload the application with a clean URL
+    gotoPage("DisplayVC", id)
+    return
+}
