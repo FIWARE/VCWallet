@@ -40,7 +40,7 @@ ${theData}
           <div class="w3-dropdown-hover">
             <btn-primary>Get Compliancy Credential</btn-primary>
             <div class="w3-dropdown-content w3-bar-block w3-border w3-padding-small">
-              <button class="w3-bar-item w3-button" @click=${() => getCompliancyCredential(theData,"https://compliance.gaia-x.fiware.dev/api/credential-offers")}>${T("FIWARE Compliance Service")}</button>
+              <button class="w3-bar-item w3-button" @click=${() => getCompliancyCredential(theData,"https://compliance.dsba.fiware.dev/api/credential-offers")}>${T("FIWARE Compliance Service")}</button>
               <button class="w3-bar-item w3-button" @click=${() => getCompliancyCredential(theData,"https://compliance.lab.gaia-x.eu/development/api/credential-offers")}>${T("Gaia-X Lab Compliance Service")}</button>
             </div>
           </div> 
