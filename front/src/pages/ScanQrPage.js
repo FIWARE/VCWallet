@@ -322,10 +322,7 @@ window.MHR.register("ScanQrPage", class ScanQrPage extends window.MHR.AbstractPa
             // Normal QR with a URL where the real data is located
             // We require secure connections with https, and do not accept http schemas
             return QR_URL;
-        } else if (qrData.startsWith("openid-initiate-issuance")) {
-            // Normal QR with OIDC4VCI connection string
-            return QR_OIDC4VCI;
-        }  else {
+        } else {
             return QR_UNKNOWN
         }
     }
