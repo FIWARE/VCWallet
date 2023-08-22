@@ -252,15 +252,19 @@ async function getVerifiableCredentialLD(backEndpoint) {
 
 async function getCredentialOffer(url) {
     try {
-        console.log("Get: " + url)
-        let response = await fetch(url, {
+        const urlParams = new URL(url).searchParams;
+        const credentialOfferURI = decodeURIComponent(urlParams.get('credential_offer_uri'));
+        console.log("Get: " + credentialOfferURI)
+        let response = await fetch(credentialOfferURI, {
             cache: "no-cache",
             mode: "cors"
         });
         if (response.ok) {
-            var credentialOffer = await response.json();
+            const credentialOffer = await response.json();
+            console.log(credentialOffer);
+            return credentialOffer;
         } else {
-            if (response.status == 403) {
+            if (response.status === 403) {
                 alert.apply("error 403");
                 window.MHR.goHome();
                 return "Error 403";
@@ -276,6 +280,4 @@ async function getCredentialOffer(url) {
         alert(error2);
         return null;
     }
-    console.log(credentialOffer);
-    return credentialOffer;
 }
