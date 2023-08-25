@@ -108,3 +108,6 @@ dist
 
 # Temporary databases with SQLite
 *.sqlite
+
+# JetBrains IDEs files
+.idea
