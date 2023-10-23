@@ -216,8 +216,6 @@ window.MHR.register("ScanQrPage", class ScanQrPage extends window.MHR.AbstractPa
       return QR_W3C_VC;
     } else if (qrData.startsWith("https")) {
       return QR_URL;
-    } else if (qrData.startsWith("openid-initiate-issuance")) {
-      return QR_OIDC4VCI;
     } else {
       return QR_UNKNOWN;
     }

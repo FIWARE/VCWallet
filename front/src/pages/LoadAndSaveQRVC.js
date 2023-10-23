@@ -2,6 +2,7 @@ import { log } from '../log'
 
 let gotoPage = window.MHR.gotoPage
 let goHome = window.MHR.goHome
+const PRE_AUTHORIZED_CODE_GRANT_TYPE = 'urn:ietf:params:oauth:grant-type:pre-authorized_code';
 
 window.MHR.register("LoadAndSaveQRVC", class LoadAndSaveQRVC extends window.MHR.AbstractPage {
 
@@ -21,45 +22,30 @@ window.MHR.register("LoadAndSaveQRVC", class LoadAndSaveQRVC extends window.MHR.
         }
 
         // Make sure it is a fully qualified URL
-        if (!qrData.startsWith("https://") && !qrData.startsWith("http://") && !qrData.startsWith("openid-initiate-issuance://")) {
+        if (!qrData.startsWith("https://") && !qrData.startsWith("http://")) {
             console.log("The scanned QR does not contain a valid URL")
             gotoPage("ErrorPage", {"title": "No data received", "msg": "The scanned QR does not contain a valid URL"})
             return
         }
 
 
-        if (qrData.startsWith("openid-initiate-issuance://")) {
-            // extract info from the openid init string 
-            var withoutPrefix = qrData.replace(/^openid-initiate-issuance:\/\/\?/, '');
-            var params = withoutPrefix.split('&');
-            var i = 0
-            while (i < params.length) {
-                var paramArray = params[i].split('=');
-                if (paramArray[0] == 'pre-authorized_code') {
-                var code = paramArray[1];
-                }
-                if (paramArray[0] == 'format') {
-                var format = paramArray[1];
-                }
-                if (paramArray[0] == 'credential_type') {
-                var credential_type = paramArray[1];
-                }
-                if (paramArray[0] == 'issuer') {
-                var issuerAddress = paramArray[1];
-                }
-                i++;
-            }
+        if (qrData.includes("/credential-offer?credential_offer_uri=")) {
+            var credentialOffer = await getCredentialOffer(qrData);
 
-            var decodedIssuerAddress = decodeURIComponent(issuerAddress)
+            var code = credentialOffer["grants"][PRE_AUTHORIZED_CODE_GRANT_TYPE]["pre-authorized_code"];
+            var format = credentialOffer["credentials"][0]["format"];
+            var credentialTypes = credentialOffer["credentials"].map(credential => credential["type"]);
+            var issuerAddress = credentialOffer["credential_issuer"];
+
             // get the openid info from the well-known endpoint
-            var openIdInfo = await getOpenIdConfig(decodedIssuerAddress)
+            var openIdInfo = await getOpenIdConfig(issuerAddress)
             var credentialEndpoint = openIdInfo["credential_endpoint"]
             var tokenEndpoint = openIdInfo["token_endpoint"]
             // get an accesstoken for retrieving the credential
             var authTokenObject = await getAuthToken(tokenEndpoint, code)
             var accessToken = authTokenObject["access_token"]
             // get the actual credential
-            var credentialResponse = await getCredentialOIDC4VCI(credentialEndpoint, accessToken, format,JSON.parse(decodeURIComponent(credential_type)))
+            var credentialResponse = await getCredentialOIDC4VCI(credentialEndpoint, accessToken, format, credentialTypes)
             console.log("Received the credentials.")
             this.VC = JSON.stringify(credentialResponse["credential"], null, 2)
         } else {
@@ -160,7 +146,7 @@ async function getCredentialOIDC4VCI(credentialEndpoint, accessToken, format, cr
   async function getAuthToken(tokenEndpoint, preAuthCode) {
     try {
       var formAttributes = {
-        'grant_type': 'urn:ietf:params:oauth:grant-type:pre-authorized_code',
+        'grant_type': PRE_AUTHORIZED_CODE_GRANT_TYPE,
         'code': preAuthCode
       }
       var formBody = [];
@@ -262,4 +248,36 @@ async function getVerifiableCredentialLD(backEndpoint) {
     }
     console.log(vc);
     return vc;
+}
+
+async function getCredentialOffer(url) {
+    try {
+        const urlParams = new URL(url).searchParams;
+        const credentialOfferURI = decodeURIComponent(urlParams.get('credential_offer_uri'));
+        console.log("Get: " + credentialOfferURI)
+        let response = await fetch(credentialOfferURI, {
+            cache: "no-cache",
+            mode: "cors"
+        });
+        if (response.ok) {
+            const credentialOffer = await response.json();
+            console.log(credentialOffer);
+            return credentialOffer;
+        } else {
+            if (response.status === 403) {
+                alert.apply("error 403");
+                window.MHR.goHome();
+                return "Error 403";
+            }
+            var error = await response.text();
+            log.error(error);
+            window.MHR.goHome();
+            alert(error);
+            return null;
+        }
+    } catch (error2) {
+        log.error(error2);
+        alert(error2);
+        return null;
+    }
 }
