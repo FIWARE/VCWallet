@@ -95,7 +95,7 @@ async function sendCredential(backEndpoint, credential, state) {
     }
     log.log("The credential: " + credential)
     var vpToken = {
-        context: ["https://www.w3.org/2018/credentials/v1"],
+        @context: ["https://www.w3.org/2018/credentials/v1"],
         type: ["VerifiablePresentation"],
         verifiableCredential: JSON.parse("[" + credential + "]"),
         // currently unverified
